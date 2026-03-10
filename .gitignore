@@ -4,3 +4,4 @@ composer.lock
 /tests/project-dir
 # coverage
 /html
+.phpstan.cache

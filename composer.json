@@ -5,17 +5,24 @@
     "type": "symfony-bundle",
     "require": {
         "php": "^8.4",
-        "symfony/framework-bundle": "^7.3||^8.0",
-        "symfony/serializer": "^7.3||^8.0"
+        "symfony/framework-bundle": "^8.0",
+        "symfony/serializer": "^8.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
-        "phpunit/phpunit": "^12",
-        "justinrainbow/json-schema": "^6.0"
+        "phpunit/phpunit": "^13",
+        "justinrainbow/json-schema": "^6.0",
+        "phpstan/phpstan": "^2.0",
+        "phpstan/extension-installer": "^1.4"
     },
     "autoload": {
         "psr-4": {
             "Survos\\IiifBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Survos\\IiifBundle\\Tests\\": "tests/"
         }
     },
     "extra": {
@@ -24,5 +31,10 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
+    }
 }

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Survos\IiifBundle;
 
+use Survos\IiifBundle\Builder\ManifestBuilder;
+use Survos\IiifBundle\Serializer\IiifSerializer;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
@@ -14,7 +16,16 @@ final class SurvosIiifBundle extends AbstractBundle
         ContainerConfigurator $container,
         ContainerBuilder $builder,
     ): void {
-        // No services to register - all classes are designed to be instantiated directly
-        // The ManifestBuilder and Model classes are stateless utilities
+        $services = $container->services();
+
+        $services
+            ->set(IiifSerializer::class)
+            ->autowire()
+            ->autoconfigure();
+
+        $services
+            ->set(ManifestBuilder::class)
+            ->autowire()
+            ->autoconfigure();
     }
 }

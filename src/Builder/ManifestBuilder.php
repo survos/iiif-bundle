@@ -4,19 +4,13 @@ declare(strict_types=1);
 namespace Survos\IiifBundle\Builder;
 
 use Survos\IiifBundle\Enum\Behavior;
-use Survos\IiifBundle\Enum\Motivation;
 use Survos\IiifBundle\Enum\ViewingDirection;
-use Survos\IiifBundle\Model\Annotation;
-use Survos\IiifBundle\Model\AnnotationPage;
 use Survos\IiifBundle\Model\Canvas;
 use Survos\IiifBundle\Model\ImageService3;
 use Survos\IiifBundle\Model\LabelMap;
 use Survos\IiifBundle\Model\Manifest;
-use Survos\IiifBundle\Model\MetadataEntry;
-use Survos\IiifBundle\Model\Range;
-use Survos\IiifBundle\Model\ResourceItem;
 use Survos\IiifBundle\Model\Service;
-use Survos\IiifBundle\Model\TextualBody;
+use Symfony\Component\Serializer\SerializerInterface;
 
 final class ManifestBuilder
 {
@@ -26,6 +20,7 @@ final class ManifestBuilder
     public function __construct(
         string $manifestId,
         string $defaultLanguage = 'en',
+        private ?SerializerInterface $serializer = null,
     ) {
         $this->manifest = Manifest::create($manifestId);
         $this->defaultLanguage = $defaultLanguage;
@@ -112,6 +107,14 @@ final class ManifestBuilder
 
     public function toJson(int $flags = JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES): string
     {
+        if ($this->serializer) {
+            return $this->serializer->serialize(
+                $this->toArray(),
+                'json',
+                ['json_encode_flags' => $flags]
+            );
+        }
+
         return json_encode($this->toArray(), $flags);
     }
 }
