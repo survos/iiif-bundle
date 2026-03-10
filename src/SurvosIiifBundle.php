@@ -1,16 +1,27 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Survos\IiifBundle;
 
+use Survos\CoreBundle\HasAssetMapperInterface;
+use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\IiifBundle\Builder\ManifestBuilder;
 use Survos\IiifBundle\Serializer\IiifSerializer;
+use Survos\IiifBundle\Twig\Components\IiifViewer;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
-final class SurvosIiifBundle extends AbstractBundle
+final class SurvosIiifBundle extends AbstractBundle implements HasAssetMapperInterface
 {
+    use HasAssetMapperTrait;
+
+    public function getPaths(): array
+    {
+        return [realpath(__DIR__ . '/../assets') => '@survos/iiif'];
+    }
+
     public function loadExtension(
         array $config,
         ContainerConfigurator $container,
@@ -27,5 +38,13 @@ final class SurvosIiifBundle extends AbstractBundle
             ->set(ManifestBuilder::class)
             ->autowire()
             ->autoconfigure();
+
+        // Register IiifViewer Twig component only when ux-twig-component is available
+        if (class_exists(\Symfony\UX\TwigComponent\Attribute\AsTwigComponent::class)) {
+            $services
+                ->set(IiifViewer::class)
+                ->autowire()
+                ->autoconfigure();
+        }
     }
 }
