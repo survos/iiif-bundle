@@ -6,6 +6,7 @@
         "controllers": {
             "iiif-viewer": {
                 "main": "controllers/iiif-viewer_controller.js",
+                "enabled": true,
                 "fetch": "lazy",
                 "autoimport": []
             }

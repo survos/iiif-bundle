@@ -55,4 +55,7 @@ final class IiifViewer
 
     /** Optional footer metadata line (e.g. "image/jpeg · 1200×800 · 340KB") */
     public string $meta = '';
+
+    /** Namespaced Stimulus controller id from controllers.json */
+    public string $stimulusController = '@survos/iiif-bundle/iiif-viewer';
 }

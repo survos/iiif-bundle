@@ -10,15 +10,17 @@
     showNav     (bool)    Show the navigator mini-map (default true)
     showLinks   (bool)    Show external viewer buttons (default true)
     meta        (string)  Optional footer metadata string
+    stimulusController (string) Namespaced Stimulus controller id
 #}
 <div {{ attributes.defaults({class: 'iiif-viewer'}) }}>
 
   {# ── OpenSeadragon viewport ──────────────────────────────────────────────── #}
   <div
-    data-controller="iiif-viewer"
-    data-iiif-viewer-info-url-value="{{ infoUrl }}"
-    data-iiif-viewer-height-value="{{ height }}"
-    data-iiif-viewer-show-nav-value="{{ showNav ? 'true' : 'false' }}"
+    {{ stimulus_controller(stimulusController, {
+      infoUrl: infoUrl,
+      height: height,
+      showNav: showNav,
+    }) }}
     style="width:100%; height:{{ height }}px; background:#111;"
   ></div>
 
