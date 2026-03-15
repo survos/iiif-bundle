@@ -16,6 +16,12 @@
 
 <div {{ attributes.defaults({ class: 'iiif-viewer' }) }}>
 
+    <style>
+        .openseadragon-container {
+            position: absolute !important;
+        }
+    </style>
+
     <div
         {{
             stimulus_controller(stimulusController, {
