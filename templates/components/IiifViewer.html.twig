@@ -2,49 +2,51 @@
   IiifViewer component — OpenSeadragon IIIF viewer with optional external viewer links.
 
   Props (from IiifViewer.php):
-    infoUrl     (string)  IIIF Image API info.json URL (required)
-    manifestUrl (string)  Direct link to the raw IIIF manifest JSON
-    miradorUrl  (string)  App route that redirects to Mirador (e.g. url('iiif_mirador', {id:…}))
-    uvUrl       (string)  App route that redirects to Universal Viewer (e.g. url('iiif_uv', {id:…}))
-    height      (int)     Viewer height in pixels (default 420)
-    showNav     (bool)    Show the navigator mini-map (default true)
-    showLinks   (bool)    Show external viewer buttons (default true)
-    meta        (string)  Optional footer metadata string
+    manifestUrl     (string)  Direct link to the raw IIIF manifest JSON (required)
+    tileSourceUrl   (string)  IIIF Image API info.json URL
+    options         (object)  OpenSeadragon viewer options  (optional)
+    miradorUrl      (string)  App route that redirects to Mirador (e.g. url('iiif_mirador', {id:…}))
+    uvUrl           (string)  App route that redirects to Universal Viewer (e.g. url('iiif_uv', {id:…}))
+    meta            (string)  Optional footer metadata string
     stimulusController (string) Namespaced Stimulus controller id
 #}
-<div {{ attributes.defaults({class: 'iiif-viewer'}) }}>
 
-  {# ── OpenSeadragon viewport ──────────────────────────────────────────────── #}
-  <div
-    {{ stimulus_controller(stimulusController, {
-      infoUrl: infoUrl,
-      height: height,
-      showNav: showNav,
-    }) }}
-    style="width:100%; height:{{ height }}px; background:#111;"
-  ></div>
+{% set defaultStyle = 'background: #111111; min-height: 420px; width: 100%;' %}
+{% set style = style ?? '' %}
 
-  {# ── Footer ──────────────────────────────────────────────────────────────── #}
-  {% if meta or (showLinks and (manifestUrl or miradorUrl or uvUrl)) %}
+<div {{ attributes.defaults({ class: 'iiif-viewer' }) }}>
+
+    <div
+        {{
+            stimulus_controller(stimulusController, {
+                manifestUrl: manifestUrl,
+                tileSourceUrl: tileSourceUrl,
+                options: options,
+            })
+        }}
+        style="{{ defaultStyle }}{{ style }}">
+    </div>
+
+    {% if meta or (showLinks and (manifestUrl or miradorUrl or uvUrl)) %}
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-2 py-1 small text-muted border-top">
 
-      <span>{{ meta }}</span>
+        <span>{{ meta }}</span>
 
-      {% if showLinks %}
-        <div class="d-flex gap-2">
-          {% if manifestUrl %}
-            <a href="{{ manifestUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">IIIF ↗</a>
-          {% endif %}
-          {% if miradorUrl %}
-            <a href="{{ miradorUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">Mirador ↗</a>
-          {% endif %}
-          {% if uvUrl %}
-            <a href="{{ uvUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">Universal Viewer ↗</a>
-          {% endif %}
+        {% if showLinks %}
+            <div class="d-flex gap-2">
+            {% if manifestUrl %}
+                <a href="{{ manifestUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">IIIF ↗</a>
+            {% endif %}
+            {% if miradorUrl %}
+                <a href="{{ miradorUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">Mirador ↗</a>
+            {% endif %}
+            {% if uvUrl %}
+                <a href="{{ uvUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">Universal Viewer ↗</a>
+            {% endif %}
+            </div>
+        {% endif %}
+
         </div>
-      {% endif %}
-
-    </div>
-  {% endif %}
+    {% endif %}
 
 </div>

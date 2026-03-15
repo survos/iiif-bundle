@@ -2,47 +2,60 @@ import { Controller } from '@hotwired/stimulus';
 import OpenSeadragon from 'openseadragon';
 
 /**
- * Stimulus controller for the IIIF Image API viewer (OpenSeadragon).
+ * Stimulus controller for the IIIF viewer (OpenSeadragon).
  *
- * Values (all set as data-iiif-viewer-*-value attributes):
- *   infoUrl      (String)  — IIIF Image API info.json URL (required)
- *   height       (Number)  — viewer height in pixels (default 420)
- *   showNav      (Boolean) — show the navigator mini-map (default true)
- *   prefixUrl    (String)  — base URL for OSD control images (default cdnjs)
+ * Values:
+ *   manifestUrl    (String)    — IIIF manifest URL             (required)
+ *   tileSourceUrl  (String)    — IIIF image info.json URL      (required)
+ *   options        (Object)    — OpenSeadragon viewer options  (optional)
+ *
  */
+
 export default class extends Controller {
     static values = {
-        infoUrl:   { type: String,  default: '' },
-        height:    { type: Number,  default: 420 },
-        showNav:   { type: Boolean, default: true },
-        prefixUrl: {
-            type:    String,
-            default: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.1/images/',
+        manifestUrl: {
+            type: String,
+            default: ''
+        },
+        tileSourceUrl: {
+            type: String,
+            default: ''
+        },
+        options: {
+            type: Object,
+            default: {}
         },
     };
 
-    connect() {
-        if (!this.infoUrlValue) {
-            console.warn('[iiif-viewer] No infoUrl value set — viewer will not load.');
+    async connect() {
+        if (!this.manifestUrlValue || !this.tileSourceUrlValue) {
+            console.warn('[iiif-viewer] Both manifestUrl and tileSourceUrl are required.');
             return;
         }
 
-        this.element.style.height = `${this.heightValue}px`;
+        const defaults = {
+            prefixUrl: 'https://cdn.jsdelivr.net/npm/openseadragon@6.0.1/build/openseadragon/images/',
+            crossOriginPolicy: false,
+            navigatorPosition: 'BOTTOM_RIGHT',
+            showFlipControl: true,
+            showRotationControl: true,
+            minZoomLevel: 0.5,
+        }
+
+        const options = {
+            ...defaults,
+            ...this.optionsValue
+        }
 
         this._viewer = OpenSeadragon({
-            element:              this.element,
-            prefixUrl:            this.prefixUrlValue,
-            tileSources:          this.infoUrlValue,
-            showNavigator:        this.showNavValue,
-            navigatorPosition:    'BOTTOM_RIGHT',
-            showRotationControl:  true,
-            showFlipControl:      false,
-            gestureSettingsMouse: { scrollToZoom: true },
-            minZoomLevel:         0.5,
-            defaultZoomLevel:     0,
-            visibilityRatio:      0.5,
-            constrainDuringPan:   false,
-            background:           '#111111',
+            element: this.element,
+            tileSources: [
+                {
+                    manifest: this.manifestUrlValue,
+                    tileSource: this.tileSourceUrlValue
+                }
+            ],
+            ...options,
         });
     }
 
