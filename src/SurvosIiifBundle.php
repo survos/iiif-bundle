@@ -9,6 +9,7 @@ use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\IiifBundle\Builder\ManifestBuilder;
 use Survos\IiifBundle\Serializer\IiifSerializer;
 use Survos\IiifBundle\Twig\Components\IiifViewer;
+use Survos\IiifBundle\Twig\IiifExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
@@ -38,6 +39,12 @@ final class SurvosIiifBundle extends AbstractBundle implements HasAssetMapperInt
             ->set(ManifestBuilder::class)
             ->autowire()
             ->autoconfigure();
+
+        $services
+            ->set(IiifExtension::class)
+            ->autowire()
+            ->autoconfigure()
+            ->tag('twig.extension');
 
         // Register IiifViewer Twig component only when ux-twig-component is available
         if (class_exists(\Symfony\UX\TwigComponent\Attribute\AsTwigComponent::class)) {
