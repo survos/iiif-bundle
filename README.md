@@ -2,6 +2,8 @@
 
 PHP 8.4+ Symfony bundle for generating IIIF Presentation API 3.0 manifests.
 
+@todo: make sure it works with https://manuscrits-france-angleterre.org/view3if/?target=https://gallica.bnf.fr/iiif/ark:/12148/bpt6k9907264/manifest.json&page=2
+
 ## Installation
 
 ```bash
