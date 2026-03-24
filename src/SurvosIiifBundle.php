@@ -7,6 +7,8 @@ namespace Survos\IiifBundle;
 use Survos\CoreBundle\HasAssetMapperInterface;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\IiifBundle\Builder\ManifestBuilder;
+use Survos\IiifBundle\Service\ManifestLoader;
+use Survos\IiifBundle\Service\ManifestSummaryExtractor;
 use Survos\IiifBundle\Serializer\IiifSerializer;
 use Survos\IiifBundle\Twig\Components\IiifViewer;
 use Survos\IiifBundle\Twig\IiifExtension;
@@ -37,6 +39,16 @@ final class SurvosIiifBundle extends AbstractBundle implements HasAssetMapperInt
 
         $services
             ->set(ManifestBuilder::class)
+            ->autowire()
+            ->autoconfigure();
+
+        $services
+            ->set(ManifestLoader::class)
+            ->autowire()
+            ->autoconfigure();
+
+        $services
+            ->set(ManifestSummaryExtractor::class)
             ->autowire()
             ->autoconfigure();
 
