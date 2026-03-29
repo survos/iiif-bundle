@@ -20,10 +20,7 @@ final class SurvosIiifBundle extends AbstractBundle implements HasAssetMapperInt
 {
     use HasAssetMapperTrait;
 
-    public function getPaths(): array
-    {
-        return [realpath(__DIR__ . '/../assets') => '@survos/iiif'];
-    }
+    public const ASSET_NAMESPACE = '@survos/iiif';
 
     public function loadExtension(
         array $config,
