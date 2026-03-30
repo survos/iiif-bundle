@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Survos\IiifBundle;
 
-use Survos\CoreBundle\HasAssetMapperInterface;
-use Survos\CoreBundle\Traits\HasAssetMapperTrait;
+use Survos\CoreBundle\Bundle\AssetMapperBundle;
 use Survos\IiifBundle\Builder\ManifestBuilder;
 use Survos\IiifBundle\Service\ManifestLoader;
 use Survos\IiifBundle\Service\ManifestSummaryExtractor;
@@ -14,13 +13,9 @@ use Survos\IiifBundle\Twig\Components\IiifViewer;
 use Survos\IiifBundle\Twig\IiifExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-final class SurvosIiifBundle extends AbstractBundle implements HasAssetMapperInterface
+final class SurvosIiifBundle extends AssetMapperBundle
 {
-    use HasAssetMapperTrait;
-
-    public const ASSET_NAMESPACE = '@survos/iiif';
+    public const ASSET_PACKAGE = 'iiif';
 
     public function loadExtension(
         array $config,

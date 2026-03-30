@@ -57,5 +57,5 @@ final class IiifViewer
     public string $meta = '';
 
     /** Namespaced Stimulus controller id from controllers.json */
-    public string $stimulusController = '@survos/iiif-bundle/iiif-viewer';
+    public string $stimulusController = '@survos/iiif/iiif-viewer';
 }

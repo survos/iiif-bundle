@@ -1,18 +1,20 @@
 {
-    "name": "@survos/iiif-bundle",
-    "description": "OpenSeadragon IIIF viewer Stimulus controller",
-    "keywords": ["symfony-ux"],
-    "symfony": {
-        "controllers": {
-            "iiif-viewer": {
-                "main": "controllers/iiif-viewer_controller.js",
-                "enabled": true,
-                "fetch": "lazy",
-                "autoimport": []
-            }
-        },
-        "importmap": {
-            "openseadragon": "^4.1.1"
-        }
+  "name": "@survos/iiif",
+  "description": "OpenSeadragon IIIF viewer Stimulus controller",
+  "keywords": [
+    "symfony-ux"
+  ],
+  "symfony": {
+    "controllers": {
+      "iiif-viewer": {
+        "main": "controllers/iiif-viewer_controller.js",
+        "enabled": true,
+        "fetch": "lazy",
+        "autoimport": []
+      }
+    },
+    "importmap": {
+      "openseadragon": "^4.1.1"
     }
+  }
 }
