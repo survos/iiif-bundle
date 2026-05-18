@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Survos\IiifBundle;
 
-use Survos\CoreBundle\Bundle\AssetMapperBundle;
+use Survos\Kit\AbstractUxBundle;
+use Survos\Kit\SurvosKitBundle;
 use Survos\IiifBundle\Builder\ManifestBuilder;
 use Survos\IiifBundle\Service\ManifestLoader;
 use Survos\IiifBundle\Service\ManifestSummaryExtractor;
@@ -12,8 +13,11 @@ use Survos\IiifBundle\Serializer\IiifSerializer;
 use Survos\IiifBundle\Twig\Components\IiifViewer;
 use Survos\IiifBundle\Twig\IiifExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Kernel\RequiredBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-final class SurvosIiifBundle extends AssetMapperBundle
+
+#[RequiredBundle(SurvosKitBundle::class)]
+final class SurvosIiifBundle extends AbstractUxBundle
 {
     public const ASSET_PACKAGE = 'iiif';
 
@@ -22,6 +26,8 @@ final class SurvosIiifBundle extends AssetMapperBundle
         ContainerConfigurator $container,
         ContainerBuilder $builder,
     ): void {
+        parent::loadExtension($config, $container, $builder);
+
         $services = $container->services();
 
         $services
