@@ -7,7 +7,7 @@
         "php": "^8.4",
         "symfony/framework-bundle": "^8.0",
         "symfony/serializer": "^8.0",
-        "survos/kit-bundle": "^2.0"
+        "survos/kit-bundle": "^2.5"
     },
     "suggest": {
         "symfony/ux-twig-component": "Required for the IiifViewer Twig component",
@@ -15,7 +15,7 @@
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
-        "phpunit/phpunit": "^13",
+        "phpunit/phpunit": "^13.0",
         "justinrainbow/json-schema": "^6.0",
         "phpstan/phpstan": "^2.0",
         "phpstan/extension-installer": "^1.4"
