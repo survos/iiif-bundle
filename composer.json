@@ -4,9 +4,9 @@
     "license": "MIT",
     "type": "symfony-bundle",
     "require": {
-        "php": "^8.4",
-        "symfony/framework-bundle": "^8.0",
-        "symfony/serializer": "^8.0",
+        "php": "^8.5",
+        "symfony/framework-bundle": "^8.1",
+        "symfony/serializer": "^8.1",
         "survos/kit-bundle": "^2.5"
     },
     "suggest": {

@@ -81,6 +81,60 @@ $json = $builder->toJson();
 $array = $builder->toArray();
 ```
 
+## Source images vs. IIIF endpoints — the `IiifUrl` resolver
+
+`ItemField::IIIF_BASE` (`iiifBase`) is overloaded. For **most** providers it is just
+the *largest non-tiff source image* — a plain, fetchable URL that imgproxy resizes
+(Fortepan, Smithsonian IDS, Walters, Cleveland…). The shared `NormalizeFallbackListener`
+(data-bundle) even sets `iiifBase = largeImageUrl` for every row. Only **genuine** IIIF
+sources (e.g. Digital Commonwealth) store an actual IIIF Image API base.
+
+`Survos\IiifBundle\Service\IiifUrl` is the single place that distinguishes them and
+turns either into a fetchable image URL:
+
+```php
+IiifUrl::isImageApiEndpoint($url);     // true only for real IIIF (contains /iiif/ or ends /info.json)
+IiifUrl::imageUrl($base);              // real IIIF → "$base/full/max/0/default.jpg"
+                                       // direct image → "$base" unchanged
+IiifUrl::imageUrl($base, '!300,300');  // custom IIIF size segment
+```
+
+**Never** decide this by file extension. The old heuristic ("no extension ⇒ it's a IIIF
+base, append `/full/max/0/default.jpg`") breaks both ways:
+
+- extensionless **direct** images — Smithsonian IDS `…/deliveryService?id=X` got
+  `…?id=X/full/max/0/default.jpg` (404 / "Invalid URL");
+- already-an-image URLs — Fortepan `…/fortepan_266.jpg` got
+  `…/fortepan_266.jpg/full/max/0/default.jpg` (dead link).
+
+### Resolve once, at normalize — not at sync/render
+
+Image-URL resolution should happen **once**, during normalization, yielding a concrete
+fetchable `imageUrl`. Everything downstream consumes that known URL:
+
+- `media:sync` historically expected **raw URLs only** — it ships known URLs to
+  mediary and must not derive `iiifBase + /full/max/…` itself.
+- Read models / templates should prefer the pre-resolved `imageUrl`.
+
+### Append sites — audit (June 2026)
+
+Each of these re-derives the image URL instead of consuming a resolved one, guessing
+IIIF-ness independently. They should call `IiifUrl` (better: consume the normalize-time
+`imageUrl`):
+
+- `folio-bundle` `Row::getThumbnailSource`, `FolioChatHit::thumbnailUrl`,
+  `FolioAiPromptBuilder` — **migrated to `IiifUrl`**.
+- `media-bundle` `MediaSyncItem` (`url`/`preferredUrl` from `iiifBase`),
+  `MediaShow::fullSizeUrl` — **still derive**; `media:sync` should take raw URLs only.
+- `meili-bundle` search-card template (`TemplateController`) — still appends
+  `iiifBase ~ '/full/' ~ size`.
+- `iiif-bundle` `ManifestSummaryExtractor`, `IiifExtension`, `IiifSize` — these build
+  from a *genuine* IIIF base (parsed manifest / explicit caller), so appending is correct.
+
+Two `NormalizeFallbackListener`s set `iiifBase` today (import-bundle, guarded on `/iiif/`;
+data-bundle, unconditional from `largeImageUrl`) — these should converge into one
+source-image resolution that also emits the concrete `imageUrl`.
+
 ## Output Example
 
 ```json
