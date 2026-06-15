@@ -56,6 +56,16 @@ final class IiifViewer
     /** Optional footer metadata line (e.g. "image/jpeg · 1200×800 · 340KB") */
     public string $meta = '';
 
+    /**
+     * Which embedded viewer to use:
+     *   'openseadragon' — deep-zoom of a single image (needs infoUrl)
+     *   'diva'          — page-turning multi-page document (needs manifestUrl); cleaner for documents
+     */
+    public string $viewer = 'openseadragon';
+
     /** Namespaced Stimulus controller id from controllers.json */
     public string $stimulusController = '@survos/iiif-bundle/iiif-viewer';
+
+    /** Namespaced Stimulus controller id for the diva.js document viewer */
+    public string $divaController = '@survos/iiif-bundle/iiif-diva';
 }

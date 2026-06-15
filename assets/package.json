@@ -1,6 +1,6 @@
 {
   "name": "@survos/iiif",
-  "description": "OpenSeadragon IIIF viewer Stimulus controller",
+  "description": "IIIF viewer Stimulus controllers (OpenSeadragon single-image, diva.js document)",
   "keywords": [
     "symfony-ux"
   ],
@@ -11,10 +11,17 @@
         "enabled": true,
         "fetch": "lazy",
         "autoimport": []
+      },
+      "iiif-diva": {
+        "main": "controllers/diva_viewer_controller.js",
+        "enabled": true,
+        "fetch": "lazy",
+        "autoimport": []
       }
     },
     "importmap": {
-      "openseadragon": "^4.1.1"
+      "openseadragon": "^4.1.1",
+      "diva.js": "^6.0.1"
     }
   }
 }

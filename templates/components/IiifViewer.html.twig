@@ -18,7 +18,20 @@
 
 <div {{ attributes.defaults({ class: 'iiif-viewer' }) }}>
 
-    {% if resolvedInfoUrl %}
+    {% if viewer == 'diva' and manifestUrl %}
+
+        {# diva.js page-turning document viewer — needs a IIIF Presentation manifest #}
+        <div
+            {{
+                stimulus_controller(divaController, {
+                    manifestUrl: manifestUrl,
+                    options: options ?? {},
+                })
+            }}
+            style="{{ defaultStyle }}">
+        </div>
+
+    {% elseif resolvedInfoUrl %}
 
         <style>
             .openseadragon-container {
