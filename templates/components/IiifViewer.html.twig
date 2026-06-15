@@ -16,6 +16,10 @@
 {% set resolvedInfoUrl = infoUrl ?? '' %}
 {% set defaultStyle = 'background: #111111; min-height: ' ~ height ~ 'px; width: 100%;' %}
 
+{# An empty Twig hash {} serializes to a JSON array [], which Stimulus rejects for
+   an Object-typed value. Only pass `options` when it actually carries settings. #}
+{% set viewerOptions = options|default({}) %}
+
 <div {{ attributes.defaults({ class: 'iiif-viewer' }) }}>
 
     {% if viewer == 'diva' and manifestUrl %}
@@ -23,10 +27,29 @@
         {# diva.js page-turning document viewer — needs a IIIF Presentation manifest #}
         <div
             {{
-                stimulus_controller(divaController, {
-                    manifestUrl: manifestUrl,
-                    options: options ?? {},
-                })
+                stimulus_controller(divaController,
+                    viewerOptions is not empty
+                        ? { manifestUrl: manifestUrl, options: viewerOptions }
+                        : { manifestUrl: manifestUrl }
+                )
+            }}
+            style="{{ defaultStyle }}">
+        </div>
+
+    {% elseif images|default([]) is not empty %}
+
+        {# OpenSeadragon paging through plain images (no IIIF Image API needed) #}
+        <style>
+            .openseadragon-container { position: absolute !important; }
+        </style>
+
+        <div
+            {{
+                stimulus_controller(stimulusController,
+                    viewerOptions is not empty
+                        ? { images: images, options: viewerOptions }
+                        : { images: images }
+                )
             }}
             style="{{ defaultStyle }}">
         </div>
@@ -41,11 +64,11 @@
 
         <div
             {{
-                stimulus_controller(stimulusController, {
-                    manifestUrl: manifestUrl,
-                    tileSourceUrl: resolvedInfoUrl,
-                    options: options ?? {},
-                })
+                stimulus_controller(stimulusController,
+                    viewerOptions is not empty
+                        ? { manifestUrl: manifestUrl, tileSourceUrl: resolvedInfoUrl, options: viewerOptions }
+                        : { manifestUrl: manifestUrl, tileSourceUrl: resolvedInfoUrl }
+                )
             }}
             style="{{ defaultStyle }}">
         </div>

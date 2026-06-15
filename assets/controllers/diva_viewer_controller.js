@@ -1,5 +1,10 @@
 import { Controller } from '@hotwired/stimulus';
-import Diva from 'diva.js';
+// diva.js 6.0.2 (the latest on npm) is a webpack/UMD build with NO ES exports —
+// it only assigns `window.Diva` as a side effect. v7.x is tagged on GitHub but
+// never published to npm, so this is what the importmap can resolve. Import for
+// the side effect and read the global. Switch to `import { Diva } from 'diva.js'`
+// if/when DDMAL publishes a v7 ESM build.
+import 'diva.js';
 
 /**
  * Stimulus controller for the diva.js IIIF document viewer.
@@ -30,7 +35,16 @@ export default class extends Controller {
             this.element.id = 'diva-' + Math.abs(this.#hash(this.manifestUrlValue));
         }
 
-        this._diva = new Diva(this.element, {
+        const Diva = window.Diva;
+        if (typeof Diva !== 'function') {
+            console.error('[iiif-diva] window.Diva is not available after importing diva.js.');
+            return;
+        }
+
+        // diva.js 6 only sets its internal element when the first arg is a string
+        // id (the `e instanceof HTMLElement` branch leaves this.element undefined),
+        // so pass the id, not the element itself.
+        this._diva = new Diva(this.element.id, {
             objectData: this.manifestUrlValue,
             enableAutoTitle: false,
             enableFullscreen: true,

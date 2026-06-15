@@ -295,6 +295,12 @@ $json = json_encode(['@context' => 'http://iiif.io/api/presentation/3/context.js
 - PHP 8.4+
 - Symfony 7.3+ / 8.0+
 
+## Viewers
+
+- [`docs/diva-viewer.md`](docs/diva-viewer.md) — diva.js document viewer status
+  (currently disabled: npm is stuck at v6, needs v7 — see DDMAL/diva.js#555) and
+  how to re-enable it.
+
 ## References
 
 - [IIIF Presentation API 3.0](https://iiif.io/api/presentation/3.0/)

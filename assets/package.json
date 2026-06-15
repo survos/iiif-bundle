@@ -7,12 +7,14 @@
   "symfony": {
     "controllers": {
       "iiif-viewer": {
+        "name": "survos/iiif/iiif-viewer",
         "main": "controllers/iiif-viewer_controller.js",
         "enabled": true,
         "fetch": "lazy",
         "autoimport": []
       },
       "iiif-diva": {
+        "name": "survos/iiif/iiif-diva",
         "main": "controllers/diva_viewer_controller.js",
         "enabled": true,
         "fetch": "lazy",
@@ -20,7 +22,7 @@
       }
     },
     "importmap": {
-      "openseadragon": "^4.1.1",
+      "openseadragon": "^6.0.1",
       "diva.js": "^6.0.1"
     }
   }

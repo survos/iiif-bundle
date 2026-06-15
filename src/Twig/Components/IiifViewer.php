@@ -27,6 +27,14 @@ final class IiifViewer
     /** IIIF Image API info.json URL — required for the embedded viewer */
     public string $infoUrl = '';
 
+    /**
+     * Plain image URLs (e.g. imgproxy-rendered JPGs) for the OpenSeadragon viewer.
+     * When set, the viewer pages through them — no IIIF Image API / info.json needed.
+     *
+     * @var list<string>
+     */
+    public array $images = [];
+
     /** IIIF Presentation API manifest URL — shown as a direct link */
     public string $manifestUrl = '';
 
@@ -63,9 +71,9 @@ final class IiifViewer
      */
     public string $viewer = 'openseadragon';
 
-    /** Namespaced Stimulus controller id from controllers.json */
-    public string $stimulusController = '@survos/iiif-bundle/iiif-viewer';
+    /** Namespaced Stimulus controller id from controllers.json (UX package @survos/iiif) */
+    public string $stimulusController = '@survos/iiif/iiif-viewer';
 
     /** Namespaced Stimulus controller id for the diva.js document viewer */
-    public string $divaController = '@survos/iiif-bundle/iiif-diva';
+    public string $divaController = '@survos/iiif/iiif-diva';
 }
