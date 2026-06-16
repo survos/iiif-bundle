@@ -43,14 +43,11 @@
             .openseadragon-container { position: absolute !important; }
         </style>
 
+        {% set viewerValues = { images: images } %}
+        {% if hiresImages|default([]) is not empty %}{% set viewerValues = viewerValues|merge({ hiresImages: hiresImages }) %}{% endif %}
+        {% if viewerOptions is not empty %}{% set viewerValues = viewerValues|merge({ options: viewerOptions }) %}{% endif %}
         <div
-            {{
-                stimulus_controller(stimulusController,
-                    viewerOptions is not empty
-                        ? { images: images, options: viewerOptions }
-                        : { images: images }
-                )
-            }}
+            {{ stimulus_controller(stimulusController, viewerValues) }}
             style="{{ defaultStyle }}">
         </div>
 

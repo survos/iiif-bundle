@@ -35,6 +35,16 @@ final class IiifViewer
      */
     public array $images = [];
 
+    /**
+     * Optional per-page high-res image URLs, parallel to $images. Paging uses the
+     * fast $images thumbnails; when the user zooms into a page, the matching
+     * high-res URL here (e.g. an imgproxy 'archive' rendition) is overlaid so the
+     * page becomes readable. Leave empty to disable progressive upgrading.
+     *
+     * @var list<string>
+     */
+    public array $hiresImages = [];
+
     /** IIIF Presentation API manifest URL — shown as a direct link */
     public string $manifestUrl = '';
 
