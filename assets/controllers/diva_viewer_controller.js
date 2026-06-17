@@ -1,20 +1,33 @@
 import { Controller } from '@hotwired/stimulus';
-// diva.js 6.0.2 (the latest on npm) is a webpack/UMD build with NO ES exports —
-// it only assigns `window.Diva` as a side effect. v7.x is tagged on GitHub but
-// never published to npm, so this is what the importmap can resolve. Import for
-// the side effect and read the global. Switch to `import { Diva } from 'diva.js'`
-// if/when DDMAL publishes a v7 ESM build.
-import 'diva.js';
+// diva.js 7.2.6+ ships a real ESM build (`build/diva.esm.js`) with a named `Diva`
+// export — no more v6 `window.Diva` side-effect hack. v7 parses IIIF Presentation
+// 2.x AND 3.x, so our canonical Presentation 3 manifests render directly.
+import { Diva } from 'diva.js';
+// diva 7 renders through OpenSeadragon but does NOT bundle it — it reads the
+// `window.OpenSeadragon` global at viewer-init time. The npm `openseadragon` UMD,
+// when resolved through the importmap, assigns to `module.exports` and skips the
+// global branch, so we import it and expose the global ourselves.
+import OpenSeadragon from 'openseadragon';
+window.OpenSeadragon ||= OpenSeadragon;
 
 /**
  * Stimulus controller for the diva.js IIIF document viewer.
  *
  * diva.js is a page-turning viewer for multi-page documents (manuscripts, PDFs,
- * pension files) — cleaner than OpenSeadragon for the "wrapper of images" case.
+ * pension files) — a document-scrolling interface over OpenSeadragon zooming,
+ * cleaner than bare OpenSeadragon for the "wrapper of images" case.
  *
  * Values:
- *   manifestUrl  (String)  — IIIF Presentation manifest URL (required)
+ *   manifestUrl  (String)  — IIIF Presentation manifest (2.x or 3.x) URL (required)
  *   options      (Object)  — diva.js settings overrides     (optional)
+ *
+ * Dispatched events (Stimulus `iiif-diva:*`, re-emitted from diva's own
+ * non-bubbling events on the inner <osd-viewer> element so a host page can react
+ * — e.g. show per-page OCR or tags). Each bubbles, so a listener anywhere up the
+ * tree catches it:
+ *   iiif-diva:page-change    detail { index, instant }  — current page (0-based) changed
+ *   iiif-diva:zoom-change    detail { zoom }             — zoom level changed
+ *   iiif-diva:loading-change detail { loading }          — tiles started/finished loading
  */
 export default class extends Controller {
     static values = {
@@ -28,26 +41,25 @@ export default class extends Controller {
             return;
         }
 
-        this.#ensureStylesheet();
-
-        // diva.js keys its instance off the element id.
+        // diva.js keys its instance off the element id and looks it up with
+        // getElementById, so the element must carry one.
         if (!this.element.id) {
             this.element.id = 'diva-' + Math.abs(this.#hash(this.manifestUrlValue));
         }
 
-        const Diva = window.Diva;
-        if (typeof Diva !== 'function') {
-            console.error('[iiif-diva] window.Diva is not available after importing diva.js.');
-            return;
-        }
+        // diva 7's own events fire on the inner <osd-viewer> custom element and do
+        // NOT bubble. Capturing listeners on an ancestor still see them (the capture
+        // phase travels root→target regardless of `bubbles`), so we attach here once,
+        // before constructing the viewer, and re-dispatch as bubbling Stimulus events.
+        this.#relay('diva-page-change', 'page-change');
+        this.#relay('diva-zoom-change', 'zoom-change');
+        this.#relay('diva-loading-change', 'loading-change');
 
-        // diva.js 6 only sets its internal element when the first arg is a string
-        // id (the `e instanceof HTMLElement` branch leaves this.element undefined),
-        // so pass the id, not the element itself.
+        // v7 constructor: `new Diva(elementId, settings)` — first arg is the id
+        // string, not the element (it does getElementById internally and throws if
+        // missing). showTitle/showSidebar default to true; override via `options`.
         this._diva = new Diva(this.element.id, {
             objectData: this.manifestUrlValue,
-            enableAutoTitle: false,
-            enableFullscreen: true,
             ...this.optionsValue,
         });
     }
@@ -59,16 +71,13 @@ export default class extends Controller {
         this._diva = null;
     }
 
-    /** Inject diva's stylesheet once (the npm CSS isn't on the importmap). */
-    #ensureStylesheet() {
-        if (document.querySelector('link[data-iiif-diva-css]')) {
-            return;
-        }
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://cdn.jsdelivr.net/npm/diva.js@6.0.1/dist/diva.min.css';
-        link.setAttribute('data-iiif-diva-css', '1');
-        document.head.appendChild(link);
+    /** Re-dispatch a diva `diva-*` event (caught in the capture phase) as a bubbling Stimulus event. */
+    #relay(divaEvent, name) {
+        this.element.addEventListener(
+            divaEvent,
+            (e) => this.dispatch(name, { prefix: 'iiif-diva', detail: e.detail }),
+            true, // capture: diva's events don't bubble; capture reaches them from the wrapper
+        );
     }
 
     #hash(str) {

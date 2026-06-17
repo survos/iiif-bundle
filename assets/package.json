@@ -23,7 +23,7 @@
     },
     "importmap": {
       "openseadragon": "^6.0.1",
-      "diva.js": "^6.0.1"
+      "diva.js": "^7.2.6"
     }
   }
 }

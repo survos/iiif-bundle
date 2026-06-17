@@ -15,6 +15,10 @@
 
 {% set resolvedInfoUrl = infoUrl ?? '' %}
 {% set defaultStyle = 'background: #111111; min-height: ' ~ height ~ 'px; width: 100%;' %}
+{# diva renders its own (light) chrome — header, toolbar, sidebar — with dark icons
+   and no dark theme, so it needs a LIGHT host surface (the #111 black above hides
+   the icons/title). It also needs a definite height and display:flex to fill it. #}
+{% set divaStyle = 'background: #f7f5f1; height: ' ~ height ~ 'px; width: 100%; display: flex;' %}
 
 {# An empty Twig hash {} serializes to a JSON array [], which Stimulus rejects for
    an Object-typed value. Only pass `options` when it actually carries settings. #}
@@ -33,7 +37,7 @@
                         : { manifestUrl: manifestUrl }
                 )
             }}
-            style="{{ defaultStyle }}">
+            style="{{ divaStyle }}">
         </div>
 
     {% elseif images|default([]) is not empty %}

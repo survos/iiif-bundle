@@ -297,9 +297,18 @@ $json = json_encode(['@context' => 'http://iiif.io/api/presentation/3/context.js
 
 ## Viewers
 
-- [`docs/diva-viewer.md`](docs/diva-viewer.md) — diva.js document viewer status
-  (currently disabled: npm is stuck at v6, needs v7 — see DDMAL/diva.js#555) and
-  how to re-enable it.
+The `<twig:iiif:viewer>` Twig component offers two embedded viewers:
+
+- `viewer="openseadragon"` (default) — deep-zoom of a single image, or paging
+  through plain image URLs (no IIIF Image API tile server needed).
+- `viewer="diva"` — the [diva.js](https://github.com/DDMAL/diva.js) **7.2.6**
+  page-turning document viewer (built on OpenSeadragon), for multi-page documents.
+  It parses IIIF Presentation 2.x and 3.x and re-dispatches diva's page/zoom/loading
+  events as bubbling `iiif-diva:*` Stimulus events so a host page can show per-page
+  OCR or tags.
+
+See [`docs/diva-viewer.md`](docs/diva-viewer.md) for the diva integration details
+(OpenSeadragon peer dependency, constructor settings, and the event wiring).
 
 ## References
 
