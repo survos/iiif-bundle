@@ -81,9 +81,7 @@ final class IiifViewer
      */
     public string $viewer = 'openseadragon';
 
-    /** Namespaced Stimulus controller id from controllers.json (UX package @survos/iiif) */
-    public string $stimulusController = '@survos/iiif/iiif-viewer';
-
-    /** Namespaced Stimulus controller id for the diva.js document viewer */
-    public string $divaController = '@survos/iiif/iiif-diva';
+    // The Stimulus controller ids are resolved in the template via the kit-bundle
+    // survos_stimulus('iiif', …) Twig helper, not hard-coded here — so the name can
+    // never drift from what Flex registered (and is validated in dev).
 }

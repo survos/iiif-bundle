@@ -6,6 +6,7 @@ namespace Survos\IiifBundle;
 
 use Survos\Kit\AbstractUxBundle;
 use Survos\Kit\SurvosKitBundle;
+use Survos\Kit\Traits\HasConfigurableRoutes;
 use Survos\IiifBundle\Builder\ManifestBuilder;
 use Survos\IiifBundle\Service\ManifestLoader;
 use Survos\IiifBundle\Service\ManifestSummaryExtractor;
@@ -20,7 +21,13 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 // Symfony\Component\HttpKernel\Bundle\Bundle <-- Flex auto-registration marker (see Survos\Kit\AbstractSurvosBundle)
 final class SurvosIiifBundle extends AbstractUxBundle
 {
-    public const ASSET_PACKAGE = 'iiif';
+    use HasConfigurableRoutes;
+
+    public function build(ContainerBuilder $container): void
+    {
+        parent::build($container);
+        $this->addRouteLoaderCompilerPass($container);
+    }
 
     public function loadExtension(
         array $config,
@@ -28,6 +35,9 @@ final class SurvosIiifBundle extends AbstractUxBundle
         ContainerBuilder $builder,
     ): void {
         parent::loadExtension($config, $container, $builder);
+
+        // Auto-register src/Controller/ routes (the diva debug viewer).
+        $this->registerRouteLoader($builder);
 
         $services = $container->services();
 

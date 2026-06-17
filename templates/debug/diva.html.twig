@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}IIIF debug viewer{% endblock %}
+
+{% block body %}
+    <div class="container-xl my-3">
+        <h1 class="h4 mb-3">IIIF debug viewer <small class="text-muted">— diva.js</small></h1>
+
+        <form method="get" class="mb-3">
+            <div class="input-group">
+                <input type="url" name="manifest" value="{{ manifestUrl }}" class="form-control"
+                       placeholder="https://…/manifest.json" autofocus
+                       {{ manifestUrl ? '' : 'required' }}>
+                <button class="btn btn-primary" type="submit">View</button>
+            </div>
+            <div class="form-text">Paste a IIIF Presentation manifest URL (v2 or v3).</div>
+        </form>
+
+        {% if manifestUrl %}
+            <div class="mb-2">
+                <a href="{{ manifestUrl }}" target="_blank" rel="noopener" class="small">{{ manifestUrl }} ↗</a>
+            </div>
+            <twig:iiif:viewer viewer="diva" manifestUrl="{{ manifestUrl }}" :height="750" :showLinks="true" />
+        {% else %}
+            <p class="text-muted">No manifest yet — paste a URL above.</p>
+        {% endif %}
+    </div>
+{% endblock %}

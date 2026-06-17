@@ -10,7 +10,9 @@
     meta            (string)  Optional footer metadata string
     height          (int)     Viewer height in pixels (default 420)
     showLinks       (bool)    Show external viewer link buttons
-    stimulusController (string) Namespaced Stimulus controller id
+
+  Stimulus controller ids are resolved via survos_stimulus('iiif-bundle', …) (kit-bundle),
+  not props — so they can't drift from what Flex registered.
 #}
 
 {% set resolvedInfoUrl = infoUrl ?? '' %}
@@ -28,10 +30,13 @@
 
     {% if viewer == 'diva' and manifestUrl %}
 
-        {# diva.js page-turning document viewer — needs a IIIF Presentation manifest #}
+        {# diva.js page-turning document viewer — needs a IIIF Presentation manifest.
+           Controller name comes from survos_stimulus() (kit-bundle), never a hard-coded
+           string — it's validated against the installed bundles in dev. #}
+        {% set _sc = survos_stimulus('iiif-bundle', 'iiif-diva') %}
         <div
             {{
-                stimulus_controller(divaController,
+                stimulus_controller(_sc,
                     viewerOptions is not empty
                         ? { manifestUrl: manifestUrl, options: viewerOptions }
                         : { manifestUrl: manifestUrl }
@@ -47,11 +52,12 @@
             .openseadragon-container { position: absolute !important; }
         </style>
 
+        {% set _sc = survos_stimulus('iiif-bundle', 'iiif-viewer') %}
         {% set viewerValues = { images: images } %}
         {% if hiresImages|default([]) is not empty %}{% set viewerValues = viewerValues|merge({ hiresImages: hiresImages }) %}{% endif %}
         {% if viewerOptions is not empty %}{% set viewerValues = viewerValues|merge({ options: viewerOptions }) %}{% endif %}
         <div
-            {{ stimulus_controller(stimulusController, viewerValues) }}
+            {{ stimulus_controller(_sc, viewerValues) }}
             style="{{ defaultStyle }}">
         </div>
 
@@ -63,9 +69,10 @@
             }
         </style>
 
+        {% set _sc = survos_stimulus('iiif-bundle', 'iiif-viewer') %}
         <div
             {{
-                stimulus_controller(stimulusController,
+                stimulus_controller(_sc,
                     viewerOptions is not empty
                         ? { manifestUrl: manifestUrl, tileSourceUrl: resolvedInfoUrl, options: viewerOptions }
                         : { manifestUrl: manifestUrl, tileSourceUrl: resolvedInfoUrl }

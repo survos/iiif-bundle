@@ -3,6 +3,7 @@
     "description": "PHP 8.4+ Symfony bundle for generating IIIF Presentation API 3.0 manifests",
     "license": "MIT",
     "type": "symfony-bundle",
+    "keywords": ["symfony", "symfony-ux", "ux", "iiif", "viewer", "openseadragon", "diva"],
     "require": {
         "php": "^8.5",
         "symfony/framework-bundle": "^8.1",
