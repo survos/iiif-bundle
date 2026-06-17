@@ -41,11 +41,23 @@ export default class extends Controller {
             return;
         }
 
-        // diva.js keys its instance off the element id and looks it up with
-        // getElementById, so the element must carry one.
-        if (!this.element.id) {
-            this.element.id = 'diva-' + Math.abs(this.#hash(this.manifestUrlValue));
-        }
+        // diva 7 renders through an Elm app that takes over and patches its mount
+        // node's DOM. Two hard constraints, learned the hard way:
+        //
+        //  1. Don't let diva mount the Stimulus-controlled element itself. Elm replaces
+        //     that node's content; Stimulus sees its controlled element mutate and
+        //     re-runs the lifecycle, and the resulting Elm/Stimulus tug-of-war throws
+        //     "Cannot read properties of undefined (reading 'childNodes')" in a loop.
+        //     So give diva its OWN child <div> to own; our element stays untouched.
+        //  2. That child MUST be a flex box with a DEFINITE height, or OSD gets a
+        //     zero-height viewport and every toolbar button silently no-ops (looks like
+        //     "dead buttons"). The host wrapper therefore sets the height and is NOT
+        //     display:flex (see IiifViewer.html.twig divaStyle); the child fills it.
+        const mount = document.createElement('div');
+        mount.id = 'diva-' + Math.abs(this.#hash(this.manifestUrlValue));
+        mount.style.cssText = 'display:flex; width:100%; height:100%;';
+        this.element.appendChild(mount);
+        this._mount = mount;
 
         // diva 7's own events fire on the inner <osd-viewer> custom element and do
         // NOT bubble. Capturing listeners on an ancestor still see them (the capture
@@ -58,7 +70,7 @@ export default class extends Controller {
         // v7 constructor: `new Diva(elementId, settings)` — first arg is the id
         // string, not the element (it does getElementById internally and throws if
         // missing). showTitle/showSidebar default to true; override via `options`.
-        this._diva = new Diva(this.element.id, {
+        this._diva = new Diva(mount.id, {
             objectData: this.manifestUrlValue,
             ...this.optionsValue,
         });
@@ -69,6 +81,8 @@ export default class extends Controller {
             this._diva.destroy();
         }
         this._diva = null;
+        this._mount?.remove();
+        this._mount = null;
     }
 
     /** Re-dispatch a diva `diva-*` event (caught in the capture phase) as a bubbling Stimulus event. */
