@@ -48,6 +48,8 @@ export default class extends Controller {
             // repaint. The canvas drawer has no such texture-timing gap and paints
             // immediately; its performance is more than adequate for paged scan images.
             drawer: 'canvas',
+            showSequenceControl: false,
+            showReferenceStrip: false,
         };
         const options = { ...defaults, ...this.optionsValue };
 
@@ -72,6 +74,15 @@ export default class extends Controller {
             referenceStripScroll: 'horizontal',
             ...options,
         });
+
+        this.element.viewer = this._viewer;
+
+        this.element.dispatchEvent(new CustomEvent('iiif-viewer:ready', {
+            bubbles: true,
+            detail: {
+                viewer: this._viewer,
+            },
+        }));
 
         // Emit `iiif-viewer:page` (0-based index + total) on open and every page
         // change, so the host page can react — e.g. show per-page OCR. Bubbles, so a
