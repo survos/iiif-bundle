@@ -11,6 +11,7 @@ use Survos\IiifBundle\Builder\ManifestBuilder;
 use Survos\IiifBundle\Service\ManifestLoader;
 use Survos\IiifBundle\Service\ManifestSummaryExtractor;
 use Survos\IiifBundle\Serializer\IiifSerializer;
+use Survos\IiifBundle\Twig\Components\IiifPdf;
 use Survos\IiifBundle\Twig\Components\IiifViewer;
 use Survos\IiifBundle\Twig\IiifExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -67,10 +68,15 @@ final class SurvosIiifBundle extends AbstractUxBundle
             ->autoconfigure()
             ->tag('twig.extension');
 
-        // Register IiifViewer Twig component only when ux-twig-component is available
+        // Register the viewer Twig components only when ux-twig-component is available
         if (class_exists(\Symfony\UX\TwigComponent\Attribute\AsTwigComponent::class)) {
             $services
                 ->set(IiifViewer::class)
+                ->autowire()
+                ->autoconfigure();
+
+            $services
+                ->set(IiifPdf::class)
                 ->autowire()
                 ->autoconfigure();
         }

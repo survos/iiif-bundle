@@ -1,0 +1,62 @@
+{#
+  IiifPdf component — pdf.js page-by-page viewer.
+
+  Props (from IiifPdf.php):
+    url        (string)  PDF URL (required)
+    page       (int)     initial 1-based page
+    pageCount  (int)     known page count (0 = discover from document)
+    height     (int)     viewer height in px (default 600)
+    meta       (string)  optional footer metadata line
+    showLinks  (bool)    show the "Open PDF ↗" link
+
+  The controller id is resolved via survos_stimulus('iiif-bundle', 'iiif-pdf') (kit-bundle),
+  never a hard-coded string — so it can't drift from what Flex registered. The controller emits
+  `iiif-viewer:page` (same as the OpenSeadragon viewer), so host per-page logic is shared.
+#}
+{% set hostStyle = 'background:#111; height:' ~ height ~ 'px; width:100%; position:relative; overflow:auto;' %}
+
+<div {{ attributes.defaults({ class: 'iiif-pdf' }) }}>
+
+    {% if url %}
+        {% set _sc = survos_stimulus('iiif-bundle', 'iiif-pdf') %}
+        <div
+            {{ stimulus_controller(_sc, { url: url, page: page, pageCount: pageCount }) }}
+            style="{{ hostStyle }}"
+        >
+            {# Toolbar — prev/next + status. data-action wires to the controller's methods;
+               data-*-target marks the elements the controller reads/writes. #}
+            <div class="d-flex justify-content-between align-items-center px-2 py-1 small"
+                 style="position:sticky; top:0; z-index:2; background:rgba(17,17,17,.85); color:#ddd;">
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-ghost-light"
+                            data-action="{{ _sc }}#prev" data-{{ _sc }}-target="prev">‹ Prev</button>
+                    <button type="button" class="btn btn-ghost-light"
+                            data-action="{{ _sc }}#next" data-{{ _sc }}-target="next">Next ›</button>
+                </div>
+                <span data-{{ _sc }}-target="status">{{ pageCount ? 'Page 1 of ' ~ pageCount : 'Loading…' }}</span>
+            </div>
+
+            {# Rendered page + overlaid (selectable / OCR) text layer. #}
+            <div style="position:relative; margin:0 auto;">
+                <canvas data-{{ _sc }}-target="canvas" style="display:block; width:100%; height:auto;"></canvas>
+                <div data-{{ _sc }}-target="textLayer" class="pdf-text-layer"
+                     style="position:absolute; inset:0; color:transparent; user-select:text;"></div>
+            </div>
+        </div>
+    {% else %}
+        <div style="min-height:{{ height }}px; display:flex; align-items:center; justify-content:center;
+                    background:#111; color:#666; border-radius:4px;">
+            <span style="font-size:.85rem;">No PDF available</span>
+        </div>
+    {% endif %}
+
+    {% if meta or (showLinks and url) %}
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-2 py-1 small text-muted border-top">
+            <span>{{ meta }}</span>
+            {% if showLinks and url %}
+                <a href="{{ url }}" target="_blank" rel="noopener" class="btn btn-xs btn-ghost-secondary">Open PDF ↗</a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+</div>

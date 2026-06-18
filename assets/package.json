@@ -1,6 +1,6 @@
 {
   "name": "@survos/iiif-bundle",
-  "description": "IIIF viewer Stimulus controllers (OpenSeadragon single-image, diva.js document)",
+  "description": "Document/page viewer Stimulus controllers (OpenSeadragon images, diva.js, pdf.js — all emit iiif-viewer:page)",
   "keywords": [
     "symfony-ux"
   ],
@@ -17,11 +17,18 @@
         "enabled": true,
         "fetch": "lazy",
         "autoimport": []
+      },
+      "iiif-pdf": {
+        "main": "controllers/pdf_viewer_controller.js",
+        "enabled": true,
+        "fetch": "lazy",
+        "autoimport": []
       }
     },
     "importmap": {
       "openseadragon": "^6.0.1",
-      "diva.js": "^7.2.6"
+      "diva.js": "^7.2.6",
+      "pdfjs-dist": "^6.0.0"
     }
   }
 }
