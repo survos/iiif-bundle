@@ -48,7 +48,8 @@ export default class extends Controller {
             // repaint. The canvas drawer has no such texture-timing gap and paints
             // immediately; its performance is more than adequate for paged scan images.
             drawer: 'canvas',
-            showSequenceControl: false,
+            sequenceMode: true,
+            showSequenceControl: true,
             showReferenceStrip: false,
         };
         const options = { ...defaults, ...this.optionsValue };
