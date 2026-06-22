@@ -2,40 +2,64 @@
   IiifViewer component — OpenSeadragon IIIF viewer with optional external viewer links.
 
   Props (from IiifViewer.php):
-    infoUrl         (string)  IIIF Image API info.json URL (required for the embedded viewer)
+    infoUrl         (string)  IIIF Image API info.json URL
     manifestUrl     (string)  Direct link to the raw IIIF manifest JSON
-    options         (object)  OpenSeadragon viewer options (optional)
+    options         (object)  OpenSeadragon viewer options
     miradorUrl      (string)  App route that redirects to Mirador
     uvUrl           (string)  App route that redirects to Universal Viewer
     meta            (string)  Optional footer metadata string
-    height          (int)     Viewer height in pixels (default 420)
+    height          (int)     Viewer max height in pixels
     showLinks       (bool)    Show external viewer link buttons
-
-  Stimulus controller ids are resolved via survos_stimulus('iiif-bundle', …) (kit-bundle),
-  not props — so they can't drift from what Flex registered.
 #}
 
 {% set resolvedInfoUrl = infoUrl ?? '' %}
-{% set defaultStyle = 'background: #111111; min-height: ' ~ height ~ 'px; width: 100%;' %}
-{# diva renders its own (light) chrome — header, toolbar, sidebar — with dark icons
-   and no dark theme, so it needs a LIGHT host surface (the #111 black above hides
-   the icons/title). The wrapper provides a DEFINITE height but must NOT be display:flex:
-   the controller mounts diva in a flex child with height:100%, and a flex wrapper would
-   collapse that child to zero height (OSD gets no viewport → toolbar buttons no-op). #}
-{% set divaStyle = 'background: #f7f5f1; height: ' ~ height ~ 'px; width: 100%; position: relative;' %}
+{% set viewerHeight = height|default(420) %}
 
-{# An empty Twig hash {} serializes to a JSON array [], which Stimulus rejects for
-   an Object-typed value. Only pass `options` when it actually carries settings. #}
+{% set defaultStyle %}
+    background:#111111;
+    width:100%;
+    position:relative;
+    min-height:{{ viewerHeight }}px;
+    height:clamp(320px,70vh,{{ viewerHeight }}px);
+{% endset %}
+
+{% set divaStyle %}
+    background:#f7f5f1;
+    width:100%;
+    position:relative;
+    min-height:{{ viewerHeight }}px;
+    height:clamp(320px,70vh,{{ viewerHeight }}px);
+{% endset %}
+
 {% set viewerOptions = options|default({}) %}
 
 <div {{ attributes.defaults({ class: 'iiif-viewer' }) }}>
 
+    <style>
+        .iiif-viewer {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .iiif-viewer .openseadragon-container {
+            position: absolute !important;
+            inset: 0;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        @media (max-width: 768px) {
+            .iiif-viewer [data-controller] {
+                height: 60vh !important;
+                min-height: 300px !important;
+            }
+        }
+    </style>
+
     {% if viewer == 'diva' and manifestUrl %}
 
-        {# diva.js page-turning document viewer — needs a IIIF Presentation manifest.
-           Controller name comes from survos_stimulus() (kit-bundle), never a hard-coded
-           string — it's validated against the installed bundles in dev. #}
         {% set _sc = survos_stimulus('iiif-bundle', 'iiif-diva') %}
+
         <div
             {{
                 stimulus_controller(_sc,
@@ -49,15 +73,17 @@
 
     {% elseif images|default([]) is not empty %}
 
-        {# OpenSeadragon paging through plain images (no IIIF Image API needed) #}
-        <style>
-            .openseadragon-container { position: absolute !important; }
-        </style>
-
         {% set _sc = survos_stimulus('iiif-bundle', 'iiif-viewer') %}
         {% set viewerValues = { images: images } %}
-        {% if hiresImages|default([]) is not empty %}{% set viewerValues = viewerValues|merge({ hiresImages: hiresImages }) %}{% endif %}
-        {% if viewerOptions is not empty %}{% set viewerValues = viewerValues|merge({ options: viewerOptions }) %}{% endif %}
+
+        {% if hiresImages|default([]) is not empty %}
+            {% set viewerValues = viewerValues|merge({ hiresImages: hiresImages }) %}
+        {% endif %}
+
+        {% if viewerOptions is not empty %}
+            {% set viewerValues = viewerValues|merge({ options: viewerOptions }) %}
+        {% endif %}
+
         <div
             {{ stimulus_controller(_sc, viewerValues) }}
             style="{{ defaultStyle }}">
@@ -65,13 +91,8 @@
 
     {% elseif resolvedInfoUrl %}
 
-        <style>
-            .openseadragon-container {
-                position: absolute !important;
-            }
-        </style>
-
         {% set _sc = survos_stimulus('iiif-bundle', 'iiif-viewer') %}
+
         <div
             {{
                 stimulus_controller(_sc,
@@ -85,8 +106,7 @@
 
     {% else %}
 
-        {# No info URL — caller is responsible for providing a fallback #}
-        <div style="min-height:{{ height }}px; display:flex; align-items:center;
+        <div style="min-height:{{ viewerHeight }}px; display:flex; align-items:center;
                     justify-content:center; background:#111; color:#666; border-radius:4px;">
             <span style="font-size:.85rem;">No image available</span>
         </div>
@@ -94,28 +114,31 @@
     {% endif %}
 
     {% if meta or (showLinks and (manifestUrl or miradorUrl or uvUrl)) %}
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-2 py-1 small text-muted border-top">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-2 py-1 small text-muted border-top">
 
-        <span>{{ meta }}</span>
+            <span>{{ meta }}</span>
 
-        {% if showLinks %}
-            <div class="d-flex gap-2">
-            {% if resolvedInfoUrl %}
-                <a href="{{ resolvedInfoUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">IIIF ↗</a>
-            {% endif %}
-            {% if manifestUrl %}
-                <a href="{{ manifestUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">Manifest ↗</a>
-            {% endif %}
-            {% if miradorUrl %}
-                <a href="{{ miradorUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">Mirador ↗</a>
-            {% endif %}
-            {% if uvUrl %}
-                <a href="{{ uvUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">Universal Viewer ↗</a>
-            {% endif %}
-            </div>
-        {% endif %}
+            {% if showLinks %}
+                <div class="d-flex gap-2 flex-wrap">
+                    {% if resolvedInfoUrl %}
+                        <a href="{{ resolvedInfoUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">IIIF ↗</a>
+                    {% endif %}
 
-    </div>
+                    {% if manifestUrl %}
+                        <a href="{{ manifestUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">Manifest ↗</a>
+                    {% endif %}
+
+                    {% if miradorUrl %}
+                        <a href="{{ miradorUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">Mirador ↗</a>
+                    {% endif %}
+
+                    {% if uvUrl %}
+                        <a href="{{ uvUrl }}" target="_blank" class="btn btn-xs btn-ghost-secondary">Universal Viewer ↗</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+        </div>
     {% endif %}
 
 </div>
