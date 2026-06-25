@@ -156,7 +156,10 @@ export default class extends Controller {
         // Skip resize while hidden, for example inactive tabs.
         if (!rect.width || !rect.height) return;
 
-        this._viewer.viewport.resize();
+        // OpenSeadragon's viewport.resize() dereferences the container-size argument
+        // (newContainerSize.x); calling it with no args throws "reading 'x' of undefined"
+        // when the ResizeObserver fires before the viewer is open. Pass the current size.
+        this._viewer.viewport.resize(new OpenSeadragon.Point(rect.width, rect.height), true);
         this._viewer.forceRedraw();
     }
 
