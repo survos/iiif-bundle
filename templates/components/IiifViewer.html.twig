@@ -33,6 +33,21 @@
 
 {% set viewerOptions = options|default({}) %}
 
+{# Toolbar icons for the OpenSeadragon (non-diva) branches, rendered server-side via
+   ux-icons so the viewer's nav buttons match the app's own icon set instead of OSD's
+   stock jsDelivr-hosted PNG sprites — see iiif-viewer_controller.js _buildToolbar(). #}
+{% set osdIcons = {
+    zoomIn: '' ~ ux_icon('tabler:zoom-in'),
+    zoomOut: '' ~ ux_icon('tabler:zoom-out'),
+    home: '' ~ ux_icon('tabler:home'),
+    fullPage: '' ~ ux_icon('tabler:maximize'),
+    previous: '' ~ ux_icon('tabler:chevron-left'),
+    next: '' ~ ux_icon('tabler:chevron-right'),
+    rotateLeft: '' ~ ux_icon('tabler:rotate'),
+    rotateRight: '' ~ ux_icon('tabler:rotate-clockwise'),
+    flip: '' ~ ux_icon('tabler:flip-horizontal'),
+} %}
+
 <div {{ attributes.defaults({ class: 'iiif-viewer' }) }}>
 
     <style>
@@ -74,7 +89,7 @@
     {% elseif images|default([]) is not empty %}
 
         {% set _sc = survos_stimulus('iiif-bundle', 'iiif-viewer') %}
-        {% set viewerValues = { images: images } %}
+        {% set viewerValues = { images: images, icons: osdIcons } %}
 
         {% if hiresImages|default([]) is not empty %}
             {% set viewerValues = viewerValues|merge({ hiresImages: hiresImages }) %}
@@ -92,15 +107,14 @@
     {% elseif resolvedInfoUrl %}
 
         {% set _sc = survos_stimulus('iiif-bundle', 'iiif-viewer') %}
+        {% set viewerValues = { manifestUrl: manifestUrl, tileSourceUrl: resolvedInfoUrl, icons: osdIcons } %}
+
+        {% if viewerOptions is not empty %}
+            {% set viewerValues = viewerValues|merge({ options: viewerOptions }) %}
+        {% endif %}
 
         <div
-            {{
-                stimulus_controller(_sc,
-                    viewerOptions is not empty
-                        ? { manifestUrl: manifestUrl, tileSourceUrl: resolvedInfoUrl, options: viewerOptions }
-                        : { manifestUrl: manifestUrl, tileSourceUrl: resolvedInfoUrl }
-                )
-            }}
+            {{ stimulus_controller(_sc, viewerValues) }}
             style="{{ defaultStyle }}">
         </div>
 
