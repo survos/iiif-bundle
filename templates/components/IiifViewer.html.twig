@@ -95,6 +95,10 @@
             {% set viewerValues = viewerValues|merge({ hiresImages: hiresImages }) %}
         {% endif %}
 
+        {% if infoUrls|default([]) is not empty %}
+            {% set viewerValues = viewerValues|merge({ infoUrls: infoUrls }) %}
+        {% endif %}
+
         {% if viewerOptions is not empty %}
             {% set viewerValues = viewerValues|merge({ options: viewerOptions }) %}
         {% endif %}

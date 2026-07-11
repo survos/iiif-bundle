@@ -45,6 +45,16 @@ final class IiifViewer
      */
     public array $hiresImages = [];
 
+    /**
+     * Optional per-page imgproxy `/info` URLs, parallel to $images. When set, the
+     * OpenSeadragon viewer fetches the current page's true source dimensions (no
+     * image bytes downloaded — imgproxy's metadata-only endpoint) and shows them
+     * under the viewer, so "is there more detail here?" doesn't require zooming in.
+     *
+     * @var list<string>
+     */
+    public array $infoUrls = [];
+
     /** IIIF Presentation API manifest URL — shown as a direct link */
     public string $manifestUrl = '';
 

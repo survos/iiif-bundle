@@ -16,6 +16,7 @@ export default class extends Controller {
         tileSourceUrl: { type: String, default: '' },
         options: { type: Object, default: {} },
         icons: { type: Object, default: {} },
+        infoUrls: { type: Array, default: [] },
     };
 
     connect() {
@@ -57,6 +58,9 @@ export default class extends Controller {
         // and same-origin/cached with the page instead of a third-party CDN fetch.
         const toolbarButtons = this._buildToolbar(paged);
 
+        this._dimsRequestId = 0;
+        this._buildDimensionsBadge();
+
         this._viewer = OpenSeadragon({
             element: this.element,
             tileSources,
@@ -82,13 +86,16 @@ export default class extends Controller {
             },
         }));
 
-        const emitPage = () => this.dispatch('page', {
-            prefix: 'iiif-viewer',
-            detail: {
-                index: this._viewer.currentPage(),
-                total: tileSources.length,
-            },
-        });
+        const emitPage = () => {
+            const index = this._viewer.currentPage();
+
+            this.dispatch('page', {
+                prefix: 'iiif-viewer',
+                detail: { index, total: tileSources.length },
+            });
+
+            this._updateDimensions(index);
+        };
 
         this._viewer.addHandler('open', () => {
             emitPage();
@@ -208,6 +215,75 @@ export default class extends Controller {
         this._toolbarEl = toolbar;
 
         return buttons;
+    }
+
+    _buildDimensionsBadge() {
+        if (!document.getElementById('iiif-viewer-dims-style')) {
+            const style = document.createElement('style');
+
+            style.id = 'iiif-viewer-dims-style';
+            style.textContent = `
+                .iiif-osd-dims {
+                    position: absolute;
+                    bottom: 8px;
+                    left: 8px;
+                    z-index: 10;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    background: rgba(17, 17, 17, .65);
+                    color: #fff;
+                    font-size: 12px;
+                    line-height: 1.6;
+                    pointer-events: none;
+                }
+            `;
+
+            document.head.appendChild(style);
+        }
+
+        const badge = document.createElement('div');
+        badge.className = 'iiif-osd-dims';
+        badge.hidden = true;
+
+        this.element.appendChild(badge);
+        this._dimsEl = badge;
+    }
+
+    // Fetches the current page's true source dimensions from imgproxy's metadata-only
+    // /info endpoint (no image bytes downloaded) — tells the user how much detail is
+    // actually in the scan without eagerly loading the hi-res rendition. Degrades
+    // silently (badge stays hidden) if infoUrls wasn't provided or the request fails,
+    // e.g. imgproxy PRO isn't licensed on this instance.
+    _updateDimensions(pageIndex) {
+        if (!this._dimsEl) return;
+
+        const url = this.infoUrlsValue[pageIndex];
+
+        if (!url) {
+            this._dimsEl.hidden = true;
+            return;
+        }
+
+        const requestId = ++this._dimsRequestId;
+
+        fetch(url)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (requestId !== this._dimsRequestId) return;
+
+                if (!data?.width || !data?.height) {
+                    this._dimsEl.hidden = true;
+                    return;
+                }
+
+                this._dimsEl.textContent = `${data.width} × ${data.height}px`;
+                this._dimsEl.hidden = false;
+            })
+            .catch(() => {
+                if (requestId === this._dimsRequestId) {
+                    this._dimsEl.hidden = true;
+                }
+            });
     }
 
     _installResponsiveResize() {
@@ -354,5 +430,9 @@ export default class extends Controller {
 
         this._toolbarEl?.remove();
         this._toolbarEl = null;
+
+        this._dimsEl?.remove();
+        this._dimsEl = null;
+        this._dimsRequestId = 0;
     }
 }
