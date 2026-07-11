@@ -3,13 +3,15 @@
 
   Props (from IiifViewer.php):
     infoUrl         (string)  IIIF Image API info.json URL
-    manifestUrl     (string)  Direct link to the raw IIIF manifest JSON
+    manifestUrl     (string)  Direct link to the raw IIIF manifest JSON — also drives the
+                              self-contained "diva.js" compare-link overlay on OSD branches
+    infoUrls        (list)    Per-page imgproxy /info URLs — drives the dimensions badge
     options         (object)  OpenSeadragon viewer options
     miradorUrl      (string)  App route that redirects to Mirador
     uvUrl           (string)  App route that redirects to Universal Viewer
     meta            (string)  Optional footer metadata string
     height          (int)     Viewer max height in pixels
-    showLinks       (bool)    Show external viewer link buttons
+    showLinks       (bool)    Show external viewer link buttons (IIIF/Manifest/Mirador/UV)
 #}
 
 {% set resolvedInfoUrl = infoUrl ?? '' %}
@@ -63,6 +65,26 @@
             height: 100% !important;
         }
 
+        .iiif-viewer .iiif-compare-link {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 10;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(17, 17, 17, .65);
+            color: #fff;
+            font-size: 12px;
+            text-decoration: none;
+        }
+        .iiif-viewer .iiif-compare-link:hover {
+            background: rgba(17, 17, 17, .9);
+            color: #fff;
+        }
+
         @media (max-width: 768px) {
             .iiif-viewer [data-controller] {
                 height: 60vh !important;
@@ -70,6 +92,18 @@
             }
         }
     </style>
+
+    {# The two OSD branches below both need to compare against diva.js when a manifest is
+       available — self-contained here so callers (e.g. folio-bundle's detail page) don't
+       need to know the debug route exists or build the link themselves. #}
+    {% set compareLink %}
+        {% if manifestUrl %}
+            <a href="{{ path('survos_iiif_debug', {manifest: manifestUrl}) }}"
+               target="_blank" rel="noopener" class="iiif-compare-link">
+                {{ ux_icon('tabler:book', { class: 'icon icon-sm' }) }} diva.js
+            </a>
+        {% endif %}
+    {% endset %}
 
     {% if viewer == 'diva' and manifestUrl %}
 
@@ -106,6 +140,7 @@
         <div
             {{ stimulus_controller(_sc, viewerValues) }}
             style="{{ defaultStyle }}">
+            {{ compareLink }}
         </div>
 
     {% elseif resolvedInfoUrl %}
@@ -120,6 +155,7 @@
         <div
             {{ stimulus_controller(_sc, viewerValues) }}
             style="{{ defaultStyle }}">
+            {{ compareLink }}
         </div>
 
     {% else %}
