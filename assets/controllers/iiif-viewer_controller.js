@@ -28,7 +28,6 @@ export default class extends Controller {
             minZoomLevel: 0.5,
             drawer: 'canvas',
             sequenceMode: true,
-            showSequenceControl: true,
             showReferenceStrip: false,
         };
 
@@ -62,6 +61,10 @@ export default class extends Controller {
             element: this.element,
             tileSources,
             sequenceMode: paged,
+            // Only show (and build) prev/next when there's more than one page — otherwise OSD
+            // falls back to its own default image-based buttons (no `element` given for a single
+            // untiled image), which 404 against prefixUrl-relative images we no longer serve.
+            showSequenceControl: paged,
             showReferenceStrip: paged,
             referenceStripScroll: 'horizontal',
             ...options,
