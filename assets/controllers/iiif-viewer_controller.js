@@ -157,9 +157,13 @@ export default class extends Controller {
                     max-width: calc(100% - 16px);
                 }
                 .iiif-osd-btn {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
+                    /* !important: OpenSeadragon's own Button control sets
+                       element.style.display = "inline-block" directly (inline JS style),
+                       which otherwise silently wins over this rule and the icon renders
+                       flush top-left instead of centered. */
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
                     width: 30px;
                     height: 30px;
                     border-radius: 50%;
