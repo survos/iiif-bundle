@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Survos\IiifBundle\Twig;
 
 use Survos\IiifBundle\Enum\IiifSize;
+use Survos\IiifBundle\Service\IiifUrl;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -13,12 +14,17 @@ use Twig\TwigFunction;
  * Twig helpers for IIIF Image API URL construction.
  *
  * Functions:
- *   iiif_url(base, size, rotation, quality, format)  → full image URL
- *   iiif_thumb(base, width, height)                  → !w,h confined URL
+ *   iiif_url(base, size, rotation, quality, format)  → full image URL (blind append)
+ *   iiif_thumb(base, width, height)                  → !w,h confined URL (blind append)
+ *   iiif_image(base, size)                           → IiifUrl::imageUrl(): appends ONLY when the
+ *                                                      value is a real Image API base; complete
+ *                                                      delivery/image URLs pass through verbatim.
+ *                                                      Use this for overloaded `iiifBase` fields.
  *
  * Filters:
  *   |iiif_url(size)        → same as iiif_url()
  *   |iiif_thumb(w, h)      → same as iiif_thumb()
+ *   |iiif_image(size)      → same as iiif_image()
  *
  * Size may be:
  *   - an IiifSize case name string: 'thumb', 'small', 'medium', 'large', 'max'
@@ -37,6 +43,7 @@ final class IiifExtension extends AbstractExtension
         return [
             new TwigFunction('iiif_url',   $this->iiifUrl(...)),
             new TwigFunction('iiif_thumb', $this->iiifThumb(...)),
+            new TwigFunction('iiif_image', $this->iiifImage(...)),
         ];
     }
 
@@ -45,6 +52,7 @@ final class IiifExtension extends AbstractExtension
         return [
             new TwigFilter('iiif_url',   $this->iiifUrl(...)),
             new TwigFilter('iiif_thumb', $this->iiifThumb(...)),
+            new TwigFilter('iiif_image', $this->iiifImage(...)),
         ];
     }
 
@@ -99,6 +107,16 @@ final class IiifExtension extends AbstractExtension
      * Resolve a size argument to a raw IIIF size string.
      * Accepts IiifSize case names (case-insensitive) or raw strings.
      */
+    /**
+     * Resolve an overloaded iiifBase/source-image value into a fetchable image URL —
+     * delegates to IiifUrl::imageUrl(), the single place that decides whether a value
+     * is a real Image API base (append size request) or a complete URL (verbatim).
+     */
+    public function iiifImage(?string $base, string $size = 'max'): string
+    {
+        return IiifUrl::imageUrl($base, $this->resolveSize($size)) ?? '';
+    }
+
     private function resolveSize(string $size): string
     {
         // Try to match an IiifSize case by name (case-insensitive)
