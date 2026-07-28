@@ -6,6 +6,7 @@
     manifestUrl     (string)  Direct link to the raw IIIF manifest JSON — also drives the
                               self-contained "diva.js" compare-link overlay on OSD branches
     infoUrls        (list)    Per-page imgproxy /info URLs — drives the dimensions badge
+    summaries       (list)    Per-page caption/credit text, forwarded via iiif-viewer:page's detail.summary
     options         (object)  OpenSeadragon viewer options
     miradorUrl      (string)  App route that redirects to Mirador
     uvUrl           (string)  App route that redirects to Universal Viewer
@@ -131,6 +132,10 @@
 
         {% if infoUrls|default([]) is not empty %}
             {% set viewerValues = viewerValues|merge({ infoUrls: infoUrls }) %}
+        {% endif %}
+
+        {% if summaries|default([]) is not empty %}
+            {% set viewerValues = viewerValues|merge({ summaries: summaries }) %}
         {% endif %}
 
         {% if viewerOptions is not empty %}

@@ -17,6 +17,7 @@ export default class extends Controller {
         options: { type: Object, default: {} },
         icons: { type: Object, default: {} },
         infoUrls: { type: Array, default: [] },
+        summaries: { type: Array, default: [] },
     };
 
     connect() {
@@ -91,7 +92,7 @@ export default class extends Controller {
 
             this.dispatch('page', {
                 prefix: 'iiif-viewer',
-                detail: { index, total: tileSources.length },
+                detail: { index, total: tileSources.length, summary: this.summariesValue[index] ?? null },
             });
 
             this._updateDimensions(index);

@@ -55,6 +55,17 @@ final class IiifViewer
      */
     public array $infoUrls = [];
 
+    /**
+     * Optional per-page descriptive text (caption/credit), parallel to $images — the same content
+     * an IIIF Presentation manifest carries as each Canvas's `summary` (see
+     * FolioController::iiifManifest()). Forwarded through the controller's `iiif-viewer:page` event
+     * as `detail.summary` on every page change, so callers can display it without maintaining a
+     * separate side-channel keyed to the current page index.
+     *
+     * @var list<string|null>
+     */
+    public array $summaries = [];
+
     /** IIIF Presentation API manifest URL — shown as a direct link */
     public string $manifestUrl = '';
 
