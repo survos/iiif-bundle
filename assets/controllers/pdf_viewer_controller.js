@@ -15,10 +15,16 @@ import * as pdfjsLib from 'pdfjs-dist';
  *
  * The controller module is registered `fetch: lazy`, so pdf.js is only pulled when a PDF row mounts.
  *
- * Values:
- *   url        (String)  the PDF URL (e.g. DC document_access.pdf)
- *   page       (Number)  initial 1-based page (default 1)
- *   pageCount  (Number)  known page count (from PdfMeta probe); 0 = discover from the document
+ * @value  url        The PDF URL (e.g. DC document_access.pdf).
+ * @value  page        Initial 1-based page. Defaults to 1.
+ * @value  pageCount   Known page count (from PdfMeta probe); 0 discovers it from the document.
+ * @target canvas      Canvas the current page is rendered onto.
+ * @target textLayer   Selectable text layer, populated from embedded PDF text or later by setOcr().
+ * @target status       Element showing "Page N of M" or an error message.
+ * @target prev         Previous-page button; disabled at page 1.
+ * @target next         Next-page button; disabled at the last page.
+ * @action prev         Goes to the previous page.
+ * @action next         Goes to the next page.
  */
 export default class extends Controller {
     static values = {

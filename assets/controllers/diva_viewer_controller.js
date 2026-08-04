@@ -17,9 +17,8 @@ window.OpenSeadragon ||= OpenSeadragon;
  * pension files) — a document-scrolling interface over OpenSeadragon zooming,
  * cleaner than bare OpenSeadragon for the "wrapper of images" case.
  *
- * Values:
- *   manifestUrl  (String)  — IIIF Presentation manifest (2.x or 3.x) URL (required)
- *   options      (Object)  — diva.js settings overrides     (optional)
+ * @value manifestUrl  IIIF Presentation manifest (2.x or 3.x) URL. Required.
+ * @value options       diva.js settings overrides. Optional.
  *
  * Dispatched events (Stimulus `iiif-diva:*`, re-emitted from diva's own
  * non-bubbling events on the inner <osd-viewer> element so a host page can react

@@ -7,6 +7,15 @@ import OpenSeadragon from 'openseadragon';
  * Modes:
  *  1. Plain images — pass `images`
  *  2. IIIF Image API — pass `tileSourceUrl`
+ *
+ * @value images        Plain image URLs to view as a paged sequence (mode 1).
+ * @value hiresImages   Higher-resolution URLs swapped in progressively as the user zooms past a page's home zoom.
+ * @value manifestUrl   IIIF manifest URL, paired with tileSourceUrl for mode 2.
+ * @value tileSourceUrl IIIF Image API tile source URL (mode 2).
+ * @value options       OpenSeadragon constructor option overrides, merged over this controller's defaults.
+ * @value icons         Map of toolbar icon key to SVG markup (server-rendered ux-icons) — previous/next/zoomIn/zoomOut/home/fullPage/rotateLeft/rotateRight/flip.
+ * @value infoUrls       Per-page imgproxy metadata-only URLs, used to show true source dimensions without downloading image bytes.
+ * @value summaries      Per-page summary text included in the dispatched `iiif-viewer:page` event detail.
  */
 export default class extends Controller {
     static values = {
