@@ -10,6 +10,22 @@ PHP 8.4+ Symfony bundle for generating IIIF Presentation API 3.0 manifests.
 composer require survos/iiif-bundle
 ```
 
+## Fetch strategy (cache/retry)
+
+`ManifestLoader` fetches through `survos/fetch-bundle`'s `PersistentFetcherInterface`.
+
+- **Cache:** keyed by manifest URL, cached **forever** in a SQLite pool at
+  `var/data/fetch_cache.db` — until `forget()`/`force_fetch`. Fine for IIIF manifests, which are
+  effectively static once published; if a source republishes a manifest at the same URL with
+  different content, `forget($manifestUrl)` is needed to see the update.
+- **Retry:** up to 5 attempts, full-jitter exponential backoff (200ms base, 10s cap), on
+  transport errors, HTTP 429, and 5xx.
+- **Local `.wip` hosts** are routed through the Symfony CLI local proxy automatically (fetch-bundle's
+  `WipProxy`) — this replaced a bundle-local `str_contains($url, '.wip')` check.
+
+Before 2026-08-08 this used a raw `HttpClientInterface` with no caching — every manifest render
+re-fetched from the source.
+
 ## Quick Start
 
 ```php

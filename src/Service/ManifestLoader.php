@@ -3,29 +3,34 @@ declare(strict_types=1);
 
 namespace Survos\IiifBundle\Service;
 
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Survos\FetchBundle\Contract\PersistentFetcherInterface;
 
 use function is_array;
 use function json_decode;
-use function str_contains;
 
 final class ManifestLoader
 {
     public function __construct(
-        private readonly HttpClientInterface $httpClient,
+        private readonly PersistentFetcherInterface $persistentFetcher,
     ) {
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * Manifests are cached indefinitely by PersistentFetcher (see this bundle's README) --
+     * fine for IIIF manifests, which are effectively static once published. `.wip` hosts are
+     * routed through the local Symfony proxy automatically (see WipProxy in fetch-bundle).
+     *
+     * @return array<string, mixed>
+     */
     public function load(string $manifestUrl): array
     {
-        $options = [];
-        if (str_contains($manifestUrl, '.wip')) {
-            $options['proxy'] = 'http://127.0.0.1:7080';
+        $result = $this->persistentFetcher->fetch($manifestUrl);
+
+        if (!$result->isOkay()) {
+            throw new \RuntimeException(sprintf('Failed to fetch IIIF manifest from %s (status %d).', $manifestUrl, $result->statusCode));
         }
 
-        $response = $this->httpClient->request('GET', $manifestUrl, $options);
-        $payload = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
+        $payload = json_decode($result->contents ?? '', true, flags: JSON_THROW_ON_ERROR);
 
         if (!is_array($payload)) {
             throw new \RuntimeException(sprintf('Invalid IIIF manifest payload from %s.', $manifestUrl));

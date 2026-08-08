@@ -8,7 +8,8 @@
         "php": "^8.5",
         "symfony/framework-bundle": "^8.1",
         "symfony/serializer": "^8.1",
-        "survos/kit-bundle": "^2.5"
+        "survos/kit-bundle": "^2.5",
+        "survos/fetch-bundle": "^2.5"
     },
     "suggest": {
         "symfony/ux-twig-component": "Required for the IiifViewer Twig component",
