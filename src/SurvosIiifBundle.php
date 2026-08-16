@@ -14,20 +14,26 @@ use Survos\IiifBundle\Serializer\IiifSerializer;
 use Survos\IiifBundle\Twig\Components\IiifPdf;
 use Survos\IiifBundle\Twig\Components\IiifViewer;
 use Survos\IiifBundle\Twig\IiifExtension;
+use Survos\Kit\Routing\ConfigurableRoutesInterface;
+use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Kernel\RequiredBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 #[RequiredBundle(SurvosKitBundle::class)]
 // Symfony\Component\HttpKernel\Bundle\Bundle <-- Flex auto-registration marker (see Survos\Kit\AbstractSurvosBundle)
-final class SurvosIiifBundle extends AbstractUxBundle
+final class SurvosIiifBundle extends AbstractUxBundle implements ConfigurableRoutesInterface
 {
     use HasConfigurableRoutes;
 
-    public function build(ContainerBuilder $container): void
+    public function configure(DefinitionConfigurator $definition): void
     {
-        parent::build($container);
-        $this->addRouteLoaderCompilerPass($container);
+        // Default prefix is '' so the diva debug viewer keeps its existing
+        // /iiif/debug URL (the prefix is what the controller attribute is
+        // appended to). Previously this bundle declared no route options at
+        // all, which meant apps had no way to switch the debug viewer off —
+        // see survos/mono#43.
+        $this->addRouteOptions($definition->rootNode()->children(), '');
     }
 
     public function loadExtension(
@@ -35,10 +41,8 @@ final class SurvosIiifBundle extends AbstractUxBundle
         ContainerConfigurator $container,
         ContainerBuilder $builder,
     ): void {
+        // parent::loadExtension() registers the diva debug viewer's routes.
         parent::loadExtension($config, $container, $builder);
-
-        // Auto-register src/Controller/ routes (the diva debug viewer).
-        $this->registerRouteLoader($builder);
 
         $services = $container->services();
 
