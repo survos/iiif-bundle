@@ -28,12 +28,22 @@ final class SurvosIiifBundle extends AbstractUxBundle implements ConfigurableRou
 
     public function configure(DefinitionConfigurator $definition): void
     {
-        // Default prefix is '' so the diva debug viewer keeps its existing
-        // /iiif/debug URL (the prefix is what the controller attribute is
-        // appended to). Previously this bundle declared no route options at
-        // all, which meant apps had no way to switch the debug viewer off —
-        // see survos/mono#43.
-        $this->addRouteOptions($definition->rootNode()->children(), '');
+        // This bundle's ENTIRE route surface is one developer tool: /iiif/debug,
+        // which renders any manifest URL handed to it in ?manifest=. It is off by
+        // default because it is a debug page that would otherwise be published
+        // unauthenticated by every app that installs the bundle, and because it
+        // renders remote content from a URL an anonymous visitor controls. Apps
+        // that want it opt in:
+        //
+        //     survos_iiif:
+        //         routes_enabled: true
+        //
+        // Default prefix stays '' so opting in restores the original /iiif/debug
+        // URL unchanged (the prefix is what the controller attribute appends to).
+        // Everything else the bundle exposes — the IiifViewer/IiifPdf Twig
+        // components, Builder, Serializer, Service — is unrouted and unaffected.
+        // See survos/mono#43.
+        $this->addRouteOptions($definition->rootNode()->children(), '', defaultEnabled: false);
     }
 
     public function loadExtension(

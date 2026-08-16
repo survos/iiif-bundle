@@ -27,7 +27,7 @@
     },
     "importmap": {
       "openseadragon": "^6.1.0",
-      "diva.js": "^7.4.0",
+      "diva.js": "^7.4.1",
       "pdfjs-dist": "^6.2.108"
     }
   }

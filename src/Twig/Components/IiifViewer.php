@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Survos\IiifBundle\Twig\Components;
 
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 /**
@@ -101,6 +103,38 @@ final class IiifViewer
      *   'diva'          — page-turning multi-page document (needs manifestUrl); cleaner for documents
      */
     public string $viewer = 'openseadragon';
+
+    public function __construct(
+        private readonly UrlGeneratorInterface $urlGenerator,
+    ) {}
+
+    /**
+     * URL of the standalone diva.js viewer for this manifest, or null when it is
+     * not reachable.
+     *
+     * The template used to call path('survos_iiif_debug', …) directly, which made
+     * the "diva.js" compare link — and therefore every host page rendering this
+     * component, e.g. folio-bundle's row/show — hard-depend on a route this bundle
+     * only registers when survos_iiif.routes_enabled is true. Since that now
+     * defaults to FALSE (it is a debug route, see SurvosIiifBundle::configure()),
+     * generating it unconditionally would throw RouteNotFoundException on pages
+     * that have nothing to do with the debug viewer.
+     *
+     * Resolving it here instead means the link simply does not render when the
+     * route is switched off, and reappears the moment an app opts in.
+     */
+    public function getDivaDebugUrl(): ?string
+    {
+        if ('' === $this->manifestUrl) {
+            return null;
+        }
+
+        try {
+            return $this->urlGenerator->generate('survos_iiif_debug', ['manifest' => $this->manifestUrl]);
+        } catch (RouteNotFoundException) {
+            return null;
+        }
+    }
 
     // The Stimulus controller ids are resolved in the template via the kit-bundle
     // survos_stimulus('iiif', …) Twig helper, not hard-coded here — so the name can

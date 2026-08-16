@@ -96,10 +96,16 @@
 
     {# The two OSD branches below both need to compare against diva.js when a manifest is
        available — self-contained here so callers (e.g. folio-bundle's detail page) don't
-       need to know the debug route exists or build the link themselves. #}
+       need to know the debug route exists or build the link themselves.
+
+       The URL comes from the component (this.divaDebugUrl), NOT from path() here: the
+       standalone diva viewer is a debug route that survos_iiif.routes_enabled now leaves
+       off by default, and calling path() on a route that isn't registered throws. The
+       component returns null in that case and the link is simply omitted. Apps that want
+       it back set `survos_iiif: { routes_enabled: true }`. #}
     {% set compareLink %}
-        {% if manifestUrl %}
-            <a href="{{ path('survos_iiif_debug', {manifest: manifestUrl}) }}"
+        {% if this.divaDebugUrl %}
+            <a href="{{ this.divaDebugUrl }}"
                target="_blank" rel="noopener" class="iiif-compare-link">
                 {{ ux_icon('tabler:book', { class: 'icon icon-sm' }) }} diva.js
             </a>
