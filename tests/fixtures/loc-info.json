@@ -1,0 +1,57 @@
+{
+    "@context": "http://iiif.io/api/image/2/context.json",
+    "@id": "https://tile.loc.gov/image-services/iiif/service:ndnp:gu:batch_gu_grouch_ver01:data:2022239700:0051701039A:1926091201:0813",
+    "protocol": "http://iiif.io/api/image",
+    "height": 6659,
+    "width": 5274,
+    "tiles": [
+        {
+            "width": 512,
+            "scaleFactors": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+            ]
+        }
+    ],
+    "profile": [
+        "http://iiif.io/api/image/2/level2.json",
+        {
+            "formats": [
+                "jpg",
+                "txt",
+                "jp2",
+                "tif",
+                "pdf",
+                "gif",
+                "png",
+                "webp"
+            ],
+            "qualities": [
+                "default",
+                "native",
+                "color",
+                "gray",
+                "bitonal"
+            ],
+            "supports": [
+                "baseUriRedirect",
+                "cors",
+                "jsonldMediaType",
+                "mirroring",
+                "regionByPct",
+                "regionByPx",
+                "rotationBy90s",
+                "sizeByWhListed",
+                "sizeByForcedWh",
+                "sizeByH",
+                "sizeByPct",
+                "sizeByW",
+                "sizeByWh"
+            ]
+        }
+    ]
+}
