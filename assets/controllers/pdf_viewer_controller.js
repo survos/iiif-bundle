@@ -57,6 +57,26 @@ export default class extends Controller {
         if (this._current > this._total) this._current = 1;
 
         await this._renderPage(this._current);
+        await this._renderThumbnails();
+    }
+
+    // Reuse the open PDF; page records remain PDF references, not extracted JPEG files.
+    async _renderThumbnails() {
+        const thumbnails = document.querySelectorAll('canvas[data-pdf-thumbnail-page]');
+        for (const canvas of thumbnails) {
+            if (!this._doc) return;
+            if (canvas.dataset.pdfThumbnailUrl !== this.urlValue) continue;
+            try {
+                const page = await this._doc.getPage(Number(canvas.dataset.pdfThumbnailPage));
+                const unscaled = page.getViewport({ scale: 1 });
+                const viewport = page.getViewport({ scale: 240 / unscaled.width });
+                canvas.width = Math.ceil(viewport.width);
+                canvas.height = Math.ceil(viewport.height);
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+            } catch (error) {
+                canvas.setAttribute('aria-label', `Page ${canvas.dataset.pdfThumbnailPage} preview unavailable`);
+            }
+        }
     }
 
     disconnect() {
